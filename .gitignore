@@ -1,0 +1,25 @@
+# Virtual environments
+envmlops/
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Environment variables
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# ML artifacts (we will configure DVC later)
+mlruns/
