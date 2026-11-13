@@ -22,4 +22,4 @@ __pycache__/
 .DS_Store
 
 # ML artifacts (we will configure DVC later)
-mlruns/
+mlruns/data/
