@@ -8,7 +8,6 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # --------------------------------------------------
 # Configuration
 # --------------------------------------------------
@@ -165,8 +164,8 @@ def predict(data: MachineData, request: Request):
             "threshold": THRESHOLD
         }
 
-    except Exception as error:
+    except (ValueError, TypeError) as error:
         raise HTTPException(
             status_code=500,
-            detail=f"Erreur pendant la prédiction : {str(error)}"
-        )
+            detail=f"Erreur pendant la prédiction : {error!s}"
+        ) from error

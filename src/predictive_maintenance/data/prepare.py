@@ -6,7 +6,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 
-
 # Chemins du projet
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 

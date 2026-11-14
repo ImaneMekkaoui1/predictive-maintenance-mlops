@@ -1,25 +1,22 @@
 
-from pathlib import Path
 
 import mlflow
 import numpy as np
 import pandas as pd
-
 from sklearn.metrics import (
+    confusion_matrix,
+    f1_score,
     precision_score,
     recall_score,
-    f1_score,
-    confusion_matrix,
 )
 
 # Réutilisation des fonctions et des 9 modèles de train.py
 from predictive_maintenance.models.train import (
     PROJECT_ROOT,
-    load_data,
     get_experiments,
     get_smote_experiments,
+    load_data,
 )
-
 
 # ==================================================
 # 1. CONFIGURATION

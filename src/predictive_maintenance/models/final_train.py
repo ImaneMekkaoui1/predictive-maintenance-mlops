@@ -1,27 +1,23 @@
 
-from pathlib import Path
-import json
 
 import mlflow
 import mlflow.xgboost
 import pandas as pd
-
 from sklearn.metrics import (
-    precision_score,
-    recall_score,
-    f1_score,
-    roc_auc_score,
     average_precision_score,
     confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
 )
 
 from predictive_maintenance.models.train import (
-    PROJECT_ROOT,
     DATA_DIR,
+    PROJECT_ROOT,
     TARGET,
     get_experiments,
 )
-
 
 # ==================================================
 # 1. CONFIGURATION
