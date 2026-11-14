@@ -1,7 +1,10 @@
-
 pandas
 numpy
 scikit-learn
+imbalanced-learn
+xgboost
 dvc
 mlflow
 jupyter
+fastapi
+uvicorn
