@@ -1,0 +1,37 @@
+# Git
+.git/
+.gitignore
+
+# Environnements Python
+envmlops/
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# MLflow
+mlruns/
+mlflow.db
+
+# DVC
+.dvc/
+.dvcignore
+dvc.yaml
+dvc.lock
+
+# Données et notebooks
+data/
+notebooks/
+reports/
+
+# IDE et système
+.idea/
+.vscode/
+.DS_Store
+
+# Fichiers sensibles
+.env
