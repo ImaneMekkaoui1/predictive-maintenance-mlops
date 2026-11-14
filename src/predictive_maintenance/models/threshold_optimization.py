@@ -45,7 +45,7 @@ def evaluate_threshold(y_true, y_proba, threshold):
     puis calcule les métriques de classification.
     """
 
-    y_pred = (y_proba >= threshold).astype(int)
+    y_pred = (y_proba > threshold).astype(int)
 
     tn, fp, fn, tp = confusion_matrix(
         y_true,
