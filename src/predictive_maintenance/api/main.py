@@ -98,6 +98,22 @@ def prepare_input(data: MachineData) -> pd.DataFrame:
 
 
 # --------------------------------------------------
+# Détermination du niveau de risque
+# --------------------------------------------------
+
+def determine_risk_level(probability: float) -> str:
+
+    if probability < 0.15:
+        return "Faible"
+
+    elif probability < 0.50:
+        return "Moyen"
+
+    else:
+        return "Élevé"
+
+
+# --------------------------------------------------
 # Routes API
 # --------------------------------------------------
 
@@ -132,16 +148,23 @@ def predict(data: MachineData, request: Request):
         )
 
     try:
+        # Préparation des données
         X = prepare_input(data)
 
+        # Calcul de la probabilité
         probability = float(model.predict_proba(X)[0][1])
 
+        # Décision selon le seuil de classification
         prediction = int(probability > THRESHOLD)
+
+        # Calcul du niveau de risque
+        risk_level = determine_risk_level(probability)
 
         return {
             "prediction": prediction,
             "failure_detected": bool(prediction),
             "failure_probability": round(probability, 4),
+            "risk_level": risk_level,
             "threshold": THRESHOLD
         }
 
