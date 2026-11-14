@@ -23,3 +23,5 @@ __pycache__/
 
 # ML artifacts (we will configure DVC later)
 mlruns/data/
+mlflow.db
+mlruns/
