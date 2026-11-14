@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
-import mlflow
+import mlflow.xgboost
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
-MODEL_URI = "models:/m-e117bda89bf74cd3b09486671b1f0e06"
+MODEL_PATH = PROJECT_ROOT / "models" / "final_model"
 
 THRESHOLD = 0.15
 
@@ -36,13 +36,10 @@ FEATURE_COLUMNS = [
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    mlflow.set_tracking_uri(
-        f"sqlite:///{PROJECT_ROOT / 'mlflow.db'}"
-    )
 
-    print("Chargement du modèle XGBoost depuis MLflow...")
+    print(f"Chargement du modèle XGBoost depuis : {MODEL_PATH}")
 
-    app.state.model = mlflow.xgboost.load_model(MODEL_URI)
+    app.state.model = mlflow.xgboost.load_model(str(MODEL_PATH))
 
     print("Modèle chargé avec succès !")
 

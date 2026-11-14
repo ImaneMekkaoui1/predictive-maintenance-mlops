@@ -1,0 +1,22 @@
+artifact_path: /Users/mac/Desktop/2 SDIA 21.18.32/Mlops/maintenance_predictive/mlruns/3/models/m-e117bda89bf74cd3b09486671b1f0e06/artifacts
+flavors:
+  python_function:
+    data: model.ubj
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.12.16
+  xgboost:
+    code: null
+    data: model.ubj
+    model_class: xgboost.sklearn.XGBClassifier
+    model_format: ubj
+    xgb_version: 3.4.1
+mlflow_version: 3.18.0
+model_id: m-e117bda89bf74cd3b09486671b1f0e06
+model_size_bytes: 376154
+model_uuid: m-e117bda89bf74cd3b09486671b1f0e06
+prompts: null
+run_id: 824e7acb99194767aa1448e8b6840604
+utc_time_created: '2026-11-14 14:17:02.487059'
