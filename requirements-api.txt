@@ -5,3 +5,5 @@ xgboost
 mlflow
 fastapi
 uvicorn
+
+httpx2

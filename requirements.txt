@@ -9,3 +9,4 @@ jupyter
 fastapi
 uvicorn
 pytest
+httpx2  
