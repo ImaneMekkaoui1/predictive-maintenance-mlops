@@ -1,0 +1,30 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/predictive_maintenance/data/prepare.py
+    deps:
+    - path: data/raw/ai4i2020.csv
+      hash: md5
+      md5: f0adaa9c5e25366c6df1cc2684479871
+      size: 522048
+    - path: src/predictive_maintenance/data/prepare.py
+      hash: md5
+      md5: e8de2c6da97678920b32f53ab87b9615
+      size: 3252
+    outs:
+    - path: data/processed/X_test.csv
+      hash: md5
+      md5: 8ab3204fdf164be3315dbfd00038d33a
+      size: 75106
+    - path: data/processed/X_train.csv
+      hash: md5
+      md5: 354d1a5fa70e0625bfc50605d2c7ee82
+      size: 299981
+    - path: data/processed/y_test.csv
+      hash: md5
+      md5: 782362b58532e0784d7eabdcf0a0fed3
+      size: 4016
+    - path: data/processed/y_train.csv
+      hash: md5
+      md5: 7518384f438226408c3b97b54aa5555c
+      size: 16016

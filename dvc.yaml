@@ -1,0 +1,11 @@
+stages:
+  prepare:
+    cmd: python src/predictive_maintenance/data/prepare.py
+    deps:
+      - src/predictive_maintenance/data/prepare.py
+      - data/raw/ai4i2020.csv
+    outs:
+      - data/processed/X_train.csv
+      - data/processed/X_test.csv
+      - data/processed/y_train.csv
+      - data/processed/y_test.csv
