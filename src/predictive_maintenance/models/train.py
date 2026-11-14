@@ -4,6 +4,7 @@ from pathlib import Path
 import mlflow
 import mlflow.sklearn
 import mlflow.xgboost
+
 import pandas as pd
 import xgboost as xgb
 
@@ -12,6 +13,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+
 from sklearn.metrics import (
     precision_score,
     recall_score,
@@ -20,6 +22,9 @@ from sklearn.metrics import (
     average_precision_score,
     confusion_matrix,
 )
+
+from imblearn.pipeline import Pipeline as ImbPipeline
+from imblearn.over_sampling import SMOTE
 
 
 # ==================================================
@@ -63,7 +68,7 @@ def load_data():
 
 
 # ==================================================
-# 3. DEFINITION DES ALGORITHMES
+# 3. EXPERIENCES INITIALES
 # ==================================================
 
 def get_experiments():
@@ -130,41 +135,119 @@ def get_experiments():
 
 
 # ==================================================
-# 4. EVALUATION ET SUIVI MLFLOW
+# 4. EXPERIENCES AVEC SMOTE
+# ==================================================
+
+def get_smote_experiments():
+
+    experiments = {
+
+        # Logistic Regression + SMOTE
+        "Logistic_Regression_SMOTE": ImbPipeline([
+            ("scaler", StandardScaler()),
+            ("smote", SMOTE(random_state=RANDOM_STATE)),
+            ("classifier", LogisticRegression(
+                max_iter=1000,
+                random_state=RANDOM_STATE,
+            )),
+        ]),
+
+        # Random Forest + SMOTE
+        "Random_Forest_SMOTE": ImbPipeline([
+            ("scaler", StandardScaler()),
+            ("smote", SMOTE(random_state=RANDOM_STATE)),
+            ("classifier", RandomForestClassifier(
+                n_estimators=200,
+                random_state=RANDOM_STATE,
+                n_jobs=-1,
+            )),
+        ]),
+
+        # XGBoost + SMOTE
+        "XGBoost_SMOTE": ImbPipeline([
+            ("scaler", StandardScaler()),
+            ("smote", SMOTE(random_state=RANDOM_STATE)),
+            ("classifier", xgb.XGBClassifier(
+                n_estimators=200,
+                max_depth=5,
+                learning_rate=0.05,
+                eval_metric="logloss",
+                random_state=RANDOM_STATE,
+                n_jobs=-1,
+            )),
+        ]),
+    }
+
+    return experiments
+
+
+# ==================================================
+# 5. EVALUATION ET SUIVI MLFLOW
 # ==================================================
 
 def train_and_log(name, model, X_train, X_val, y_train, y_val):
 
     with mlflow.start_run(run_name=name):
 
-        # Entraînement
+        # ------------------------------------------
+        # ENTRAINEMENT
+        # ------------------------------------------
+
         model.fit(X_train, y_train)
 
-        # Prédictions
+        # ------------------------------------------
+        # PREDICTIONS
+        # ------------------------------------------
+
         y_pred = model.predict(X_val)
         y_proba = model.predict_proba(X_val)[:, 1]
 
-        # Calcul des métriques
+        # ------------------------------------------
+        # CALCUL DES METRIQUES
+        # ------------------------------------------
+
         metrics = {
             "precision": precision_score(
                 y_val, y_pred, zero_division=0
             ),
+
             "recall": recall_score(
                 y_val, y_pred, zero_division=0
             ),
+
             "f1_score": f1_score(
                 y_val, y_pred, zero_division=0
             ),
-            "roc_auc": roc_auc_score(y_val, y_proba),
-            "pr_auc": average_precision_score(y_val, y_proba),
+
+            "roc_auc": roc_auc_score(
+                y_val, y_proba
+            ),
+
+            "pr_auc": average_precision_score(
+                y_val, y_proba
+            ),
         }
 
-        # Enregistrement des paramètres et métriques dans MLflow
+        # ------------------------------------------
+        # ENREGISTREMENT DES PARAMETRES ET METRIQUES
+        # ------------------------------------------
+
         mlflow.log_param("model_name", name)
-        mlflow.log_params(model.get_params())
+
+        # Enregistrer les paramètres simples du modèle
+        model_params = {
+            key: value
+            for key, value in model.get_params(deep=True).items()
+            if isinstance(value, (str, int, float, bool))
+        }
+
+        mlflow.log_params(model_params)
         mlflow.log_metrics(metrics)
 
-        # Matrice de confusion
+        # ------------------------------------------
+        # MATRICE DE CONFUSION
+        # ------------------------------------------
+
         tn, fp, fn, tp = confusion_matrix(
             y_val,
             y_pred,
@@ -181,9 +264,22 @@ def train_and_log(name, model, X_train, X_val, y_train, y_val):
             "confusion_matrix.json",
         )
 
-        # Sauvegarde du modèle dans MLflow selon sa bibliothèque
-        if isinstance(model, xgb.XGBClassifier):
+        # ------------------------------------------
+        # SAUVEGARDE DU MODELE DANS MLFLOW
+        # ------------------------------------------
 
+        if isinstance(model, ImbPipeline):
+
+            # Pipeline contenant SMOTE
+            mlflow.sklearn.log_model(
+                sk_model=model,
+                name="model",
+                serialization_format="cloudpickle",
+            )
+
+        elif isinstance(model, xgb.XGBClassifier):
+
+            # Modèle XGBoost seul
             mlflow.xgboost.log_model(
                 xgb_model=model,
                 name="model",
@@ -191,13 +287,19 @@ def train_and_log(name, model, X_train, X_val, y_train, y_val):
 
         else:
 
+            # Logistic Regression et Random Forest
             mlflow.sklearn.log_model(
                 sk_model=model,
                 name="model",
-                skops_trusted_types=["sklearn.tree._tree.Tree"],
+                skops_trusted_types=[
+                    "sklearn.tree._tree.Tree"
+                ],
             )
 
-        # Affichage des résultats
+        # ------------------------------------------
+        # AFFICHAGE DES RESULTATS
+        # ------------------------------------------
+
         print(f"\n========== {name} ==========")
 
         for metric, value in metrics.items():
@@ -207,7 +309,7 @@ def train_and_log(name, model, X_train, X_val, y_train, y_val):
 
 
 # ==================================================
-# 5. EXECUTION PRINCIPALE
+# 6. EXECUTION PRINCIPALE
 # ==================================================
 
 def main():
@@ -228,10 +330,22 @@ def main():
     print("\nTraining class distribution:")
     print(y_train.value_counts(normalize=True))
 
-    # Récupération des expériences
+    # ------------------------------------------
+    # RECUPERATION DES EXPERIENCES
+    # ------------------------------------------
+
+    # Les six expériences initiales
     experiments = get_experiments()
 
-    # Exécution des six expériences
+    # Ajout des trois expériences SMOTE
+    experiments.update(get_smote_experiments())
+
+    print(f"\nNombre total d'expériences : {len(experiments)}")
+
+    # ------------------------------------------
+    # EXECUTION DES NEUF EXPERIENCES
+    # ------------------------------------------
+
     for name, model in experiments.items():
 
         train_and_log(
