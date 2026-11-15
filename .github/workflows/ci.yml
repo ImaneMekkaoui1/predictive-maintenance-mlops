@@ -35,3 +35,7 @@ jobs:
       - name: Run automated tests
         run: |
           PYTHONPATH=src pytest -v
+
+      - name: Build Docker image
+        run: |
+          docker build -t predictive-maintenance-api:test .
