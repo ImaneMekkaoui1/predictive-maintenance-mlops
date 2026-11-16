@@ -4,6 +4,14 @@ name: CD - Deploy to Oracle Cloud
 on:
   workflow_dispatch:
 
+  workflow_run:
+    workflows:
+      - "CI/CD - Predictive Maintenance"
+    types:
+      - completed
+    branches:
+      - main
+
 permissions:
   contents: read
 
@@ -14,8 +22,18 @@ concurrency:
 jobs:
   deploy:
     name: Deploy FastAPI to Oracle
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.head_repository.full_name == github.repository
+        )
+      }}
 
     steps:
       - name: Configure SSH
