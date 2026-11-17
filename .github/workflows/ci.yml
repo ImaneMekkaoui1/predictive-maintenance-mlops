@@ -70,11 +70,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      
       - name: Build and publish multi-platform Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/imanemekkaoui1/predictive-maintenance-mlops:latest
-
+          tags: |
+            ghcr.io/imanemekkaoui1/predictive-maintenance-mlops:latest
+            ghcr.io/imanemekkaoui1/predictive-maintenance-mlops:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
