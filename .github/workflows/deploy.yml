@@ -54,8 +54,15 @@ jobs:
         env:
           ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
           ORACLE_USER: ${{ secrets.ORACLE_USER }}
+          DEPLOY_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 \
+          # Vérifier que le SHA contient 40 caractères hexadécimaux
+          [[ "$DEPLOY_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+
+          echo "Déploiement du commit : $DEPLOY_SHA"
+
+          # Transmettre le SHA au script Oracle par SSH
+          printf '%s\n' "$DEPLOY_SHA" | ssh -i ~/.ssh/id_ed25519 \
             -o IdentitiesOnly=yes \
             -o StrictHostKeyChecking=yes \
             -o BatchMode=yes \
