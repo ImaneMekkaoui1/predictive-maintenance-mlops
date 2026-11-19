@@ -25,3 +25,5 @@ __pycache__/
 mlruns/data/
 mlflow.db
 mlruns/
+
+monitoring/.env
