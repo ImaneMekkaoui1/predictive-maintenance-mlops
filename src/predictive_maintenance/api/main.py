@@ -6,9 +6,9 @@ from typing import Literal
 import mlflow.xgboost
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel, ConfigDict, Field
 from prometheus_client import Counter
 from prometheus_fastapi_instrumentator import Instrumentator
+from pydantic import BaseModel, ConfigDict, Field
 
 # --------------------------------------------------
 # Configuration
