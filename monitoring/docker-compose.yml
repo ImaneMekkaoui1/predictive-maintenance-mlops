@@ -1,5 +1,8 @@
 
 services:
+  # ==========================================
+  # FastAPI - Predictive Maintenance
+  # ==========================================
   api:
     build:
       context: ..
@@ -9,6 +12,9 @@ services:
     restart: unless-stopped
     mem_limit: 1g
 
+  # ==========================================
+  # Prometheus - Metrics Collection
+  # ==========================================
   prometheus:
     image: prom/prometheus:latest
     ports:
@@ -23,8 +29,12 @@ services:
       - "--storage.tsdb.retention.size=256MB"
     depends_on:
       - api
+    restart: unless-stopped
     mem_limit: 512m
 
+  # ==========================================
+  # Grafana - MLOps Monitoring Dashboard
+  # ==========================================
   grafana:
     image: grafana/grafana:latest
     ports:
@@ -33,10 +43,17 @@ services:
       - .env
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/predictive-maintenance-dashboard.json:/etc/grafana/dashboards/predictive-maintenance-dashboard.json:ro
     depends_on:
       - prometheus
+    restart: unless-stopped
     mem_limit: 512m
 
+# ==========================================
+# Persistent Docker Volumes
+# ==========================================
 volumes:
   prometheus_data:
   grafana_data:
