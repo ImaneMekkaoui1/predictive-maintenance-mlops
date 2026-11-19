@@ -7,6 +7,8 @@ import mlflow.xgboost
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
+from prometheus_client import Counter
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # --------------------------------------------------
 # Configuration
@@ -17,6 +19,17 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 MODEL_PATH = PROJECT_ROOT / "models" / "final_model"
 
 THRESHOLD = 0.15
+
+
+# --------------------------------------------------
+# Monitoring Prometheus - Prédictions ML
+# --------------------------------------------------
+
+PREDICTIONS_TOTAL = Counter(
+    "maintenance_predictions_total",
+    "Nombre total de predictions du modele ML",
+    ["risk_level", "prediction"]
+)
 
 FEATURE_COLUMNS = [
     "Type_L",
@@ -52,6 +65,18 @@ app = FastAPI(
     description="API de prédiction des défaillances industrielles avec XGBoost.",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+
+# --------------------------------------------------
+# Monitoring Prometheus - Métriques HTTP
+# --------------------------------------------------
+
+Instrumentator(
+    excluded_handlers=["/metrics"]
+).instrument(app).expose(
+    app,
+    include_in_schema=False
 )
 
 
@@ -154,9 +179,18 @@ def predict(data: MachineData, request: Request):
         prediction = int(probability > THRESHOLD)
 
         # Calcul du niveau de risque
+        
+        # Calcul du niveau de risque
         risk_level = determine_risk_level(probability)
 
+        # Enregistrer une prédiction réussie dans Prometheus
+        PREDICTIONS_TOTAL.labels(
+            risk_level=risk_level,
+            prediction=str(prediction)
+        ).inc()
+
         return {
+
             "prediction": prediction,
             "failure_detected": bool(prediction),
             "failure_probability": round(probability, 4),

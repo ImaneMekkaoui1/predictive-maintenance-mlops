@@ -145,3 +145,28 @@ def test_prediction_missing_field():
         response = client.post("/predict", json=payload)
 
         assert response.status_code == 422
+
+
+def test_metrics_endpoint():
+    """Vérifie les métriques HTTP et les prédictions ML."""
+
+    payload = {
+        "type": "L",
+        "air_temperature_k": 300.5,
+        "process_temperature_k": 310.0,
+        "rotational_speed_rpm": 1345,
+        "torque_nm": 62.7,
+        "tool_wear_min": 153
+    }
+
+    with TestClient(app) as client:
+        assert client.get("/health").status_code == 200
+        assert client.post("/predict", json=payload).status_code == 200
+
+        response = client.get("/metrics")
+
+        assert response.status_code == 200
+        assert "http_requests_total" in response.text
+        assert "http_request_duration_seconds_bucket" in response.text
+        assert "maintenance_predictions_total" in response.text
+        assert 'risk_level="Faible"' in response.text

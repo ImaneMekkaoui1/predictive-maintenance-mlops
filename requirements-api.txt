@@ -7,3 +7,5 @@ fastapi
 uvicorn
 
 httpx2
+prometheus-fastapi-instrumentator==8.1.0
+prometheus-client
