@@ -1,0 +1,18 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="#F7F9FC", pad="0.35", nodesep="0.6", ranksep="0.9", splines=polyline, fontname="DejaVu Sans"];
+  node [shape=box, style="rounded,filled", color="#CBD9E7", fillcolor="white", fontcolor="#19324A", penwidth=1.3, fontname="DejaVu Sans", fontsize=12, margin="0.23,0.18"];
+  edge [color="#6387A7", penwidth=1.7, arrowsize=0.75, fontsize=10, fontname="DejaVu Sans"];
+  subgraph cluster_mac { label="MACBOOK · DOCKER COMPOSE"; fontname="DejaVu Sans"; fontsize=13; fontcolor="#34506D"; color="#CBDDE9"; style="rounded"; margin=20;
+    local [label="FastAPI locale\napi:8000 · hôte 8004", fillcolor="#E5F6ED", color="#8BCFA9"];
+    prom [label="Prometheus\nlocalhost:9090", fillcolor="#EAF2FF", color="#B4CEEB"];
+    graf [label="Grafana\nlocalhost:3000", fillcolor="#EAF2FF", color="#B4CEEB"];
+    local -> prom [label="job: fastapi"];
+    prom -> graf [label="PromQL"];
+  }
+  subgraph cluster_oracle { label="ORACLE CLOUD · MACHINE PARTAGÉE"; fontname="DejaVu Sans"; fontsize=13; fontcolor="#34506D"; color="#CBDDE9"; style="rounded"; margin=20;
+    remote [label="maintenance-api\n127.0.0.1:18000", fillcolor="#E5F6ED", color="#8BCFA9"];
+  }
+  ssh [label="Tunnel SSH chiffré\nMac 127.0.0.1:18001", fillcolor="#F0EFFF", color="#CCC7F4"];
+  remote -> ssh [label="/metrics", color="#746AB6"];
+  ssh -> prom [label="job: oracle-fastapi\nhost.docker.internal:18001", color="#746AB6"];
+}

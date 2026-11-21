@@ -1,0 +1,26 @@
+digraph G {
+  graph [rankdir=TB, bgcolor="#F7F9FC", pad="0.35", nodesep="0.56", ranksep="0.75", splines=polyline, fontname="DejaVu Sans"];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=12, margin="0.20,0.16", penwidth=1.3, color="#D4DFEA", fillcolor="#FFFFFF", fontcolor="#19324A"];
+  edge [color="#6D88A4", arrowsize=0.7, penwidth=1.7, fontname="DejaVu Sans", fontsize=10, fontcolor="#556D86"];
+  subgraph cluster_data { label="DONNÉES & EXPÉRIMENTATION"; fontname="DejaVu Sans"; fontsize=13; fontcolor="#34506D"; color="#D7E3F0"; style="rounded"; margin=20;
+    ai4i [label="AI4I 2020\n10 000 observations", fillcolor="#E9F3FF", color="#B9D8F6"];
+    dvc [label="DVC + Google Drive\nVersionnement des données", fillcolor="#E9F3FF", color="#B9D8F6"];
+    prep [label="Préparation\nSplit stratifié et encodage"];
+    ml [label="MLflow\nExpériences et métriques", fillcolor="#E9F3FF", color="#B9D8F6"];
+    model [label="XGBoost\nModèle final · seuil 0,15", fillcolor="#DDF6F0", color="#7EC8B5"];
+    ai4i -> prep; dvc -> prep [style=dashed, constraint=false]; prep -> ml; ml -> model;
+  }
+  subgraph cluster_app { label="APPLICATION"; fontname="DejaVu Sans"; fontsize=13; fontcolor="#34506D"; color="#D7E3F0"; style="rounded"; margin=20;
+    api [label="FastAPI\n/predict · /health · /metrics", fillcolor="#DDF6F0", color="#7EC8B5"];
+    client [label="Swagger / curl\nClient JSON"];
+    api -> client [label="Décision · probabilité\nNiveau de risque"];
+  }
+  subgraph cluster_ops { label="LIVRAISON & OBSERVABILITÉ"; fontname="DejaVu Sans"; fontsize=13; fontcolor="#34506D"; color="#D7E3F0"; style="rounded"; margin=20;
+    ghcr [label="GitHub Actions + GHCR\nImages Docker versionnées", fillcolor="#F0EFFF", color="#CCC7F4"];
+    oracle [label="Oracle Cloud\nConteneur maintenance-api", fillcolor="#F0EFFF", color="#CCC7F4"];
+    prom [label="Prometheus\nMétriques /metrics"];
+    grafana [label="Grafana\n12 panneaux local / Oracle", fillcolor="#F0EFFF", color="#CCC7F4"];
+    ghcr -> oracle; oracle -> prom [label="SSH tunnel\nmonitoring distant"]; prom -> grafana;
+  }
+  model -> api; api -> oracle [style=dotted, label="Conteneurisation"]; 
+}
